@@ -38,11 +38,60 @@ Builder.load_string('''
             size_hint_y: None
             y: 50
             height: root.height - self.y
-        Button:
-            size_hint_y: None
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1,None
             height: 50
-            text: "Done Turn"
-            on_press: grid.get_input()
+            Label:
+                size_hint_x: .10
+                text: "Legend:"
+            Label:
+                color: 0,0,0,1
+                size_hint_x: .15
+                text: "Normal Block"
+                canvas.before:
+                    Color:
+                        rgb: 1,1,1
+                    Rectangle:
+                        size: self.width - 10, self.height - 10
+                        pos: self.x + 5, self.y + 5
+            Label:
+                size_hint_x: .15
+                text: "Broken Block"
+                canvas.before:
+                    Color:
+                        rgb: 0,0,0
+                    Rectangle:
+                        size: self.width - 10, self.height - 10
+                        pos: self.x + 5, self.y + 5
+            Label:
+                color: 0,0,0,1
+                size_hint_x: .15
+                text: "Can Break"
+                canvas.before:
+                    Color:
+                        rgb: 1,.8,.8
+                    Rectangle:
+                        size: self.width - 10, self.height - 10
+                        pos: self.x + 5, self.y + 5
+            Label:
+                color: 0,0,0,1
+                size_hint_x: .15
+                text: "Can Move"
+                canvas.before:
+                    Color:
+                        rgb: .8,.8,1
+                    Rectangle:
+                        size: self.width - 10, self.height - 10
+                        pos: self.x + 5, self.y + 5
+            Label:
+                size_hint_x: .10
+                text: "Time: " + str(root.time)
+            Button:
+                size_hint: .20,None
+                height: 50
+                text: "Done Turn"
+                on_press: grid.get_input()
 
 <SpleefGrid>:
     spacing: 1.5
@@ -145,7 +194,6 @@ class Bot(Widget):
 
     def remove(self): #This bot died
         self.sg.grid[self.row][self.col].remove_widget(self)
-        self.sg.bots.remove(self)
 
 class SpleefCell(RelativeLayout):
     row = NumericProperty(0)
@@ -230,7 +278,8 @@ class SpleefGrid(GridLayout):
                 self.cols = int(info[1])
                 self.rows = int(info[2])
             if info[0] == "t": #Set the max time
-                maxtime = int(info[1])
+                self.maxtime = int(info[1])
+                Clock.schedule_interval(self.parent.parent.decrease_time, 1)
             if info[0] == "p": #Set bot location
                 if len(self.bots) <= int(info[1]) or self.bots[int(info[1])] is None:
                     r = 0
@@ -251,9 +300,13 @@ class SpleefGrid(GridLayout):
             if info[0] == "b": #A block has been broken
                 self.grid[int(info[2])][int(info[1])].broken = True
             info = raw_input().split(" ")
+        self.parent.parent.time = self.maxtime/1000
 
 class SpleefGame(Widget):
-    pass
+    time = NumericProperty(0)
+
+    def decrease_time(self, *args):
+        self.time -= 1
 
 game = SpleefGame()
 
