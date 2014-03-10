@@ -4,6 +4,10 @@ import sys, os
 
 sys.stderr = open(os.devnull, 'w') #The judge didn't like having any output, even on stderr
 
+#Turns out it says stuff on Windows via stdout. Let's prevent everything and call stdout manually.
+stdout = sys.stdout
+sys.stdout = open(os.devnull, 'w')
+
 import kivy
 kivy.require('1.8.0')
 
@@ -146,7 +150,7 @@ class Options(Bubble):
     breakbutton = ObjectProperty(None)
 
     def move(self): #Moves to the specified location
-        print "m " + str(self.cell.col) + " " + str(self.cell.row)
+        stdout.write("m " + str(self.cell.col) + " " + str(self.cell.row) + "\n")
         self.parent.remove_widget(opts)
         self.cell.selected = False
         #If only moved a manhattan distance of 1 then let them break blocks still
@@ -157,7 +161,7 @@ class Options(Bubble):
             self.cell.parent.get_input()
 
     def break_block(self): #Breaks the selected block and ends the turn
-        print "b " + str(self.cell.col) + " " + str(self.cell.row)
+        stdout.write("b " + str(self.cell.col) + " " + str(self.cell.row) + "\n")
         self.parent.remove_widget(opts)
         self.cell.selected = False
         self.cell.parent.get_input()
@@ -271,7 +275,7 @@ class SpleefGrid(GridLayout):
                 self.grid.append(row)
 
     def get_input(self, *args):
-        print("d") #Either finished setting up or finished turn
+        stdout.write("d\n") #Either finished setting up or finished turn
         info = raw_input().split(" ")
         while info[0] != "d":
             if info[0] == "g": #Set the grid size
